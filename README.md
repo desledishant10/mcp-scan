@@ -3,7 +3,7 @@
 [![tests](https://github.com/desledishant10/mcp-scan/actions/workflows/tests.yml/badge.svg)](https://github.com/desledishant10/mcp-scan/actions/workflows/tests.yml)
 [![license: Apache 2.0](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 [![python: 3.11+](https://img.shields.io/badge/python-3.11+-blue)](pyproject.toml)
-[![findings: 6](https://img.shields.io/badge/findings-6-orange)](findings/)
+[![findings: 8](https://img.shields.io/badge/findings-8-orange)](findings/)
 [![corpus: 10 targets](https://img.shields.io/badge/corpus-10_targets_stable-green)](calibration/ground_truth/)
 
 > Security scanner for Model Context Protocol servers and AI agents.
@@ -14,17 +14,20 @@ Finds vulnerabilities in MCP server implementations and tests AI agents against 
 
 ## Real findings to date
 
-Five documented audit observations against real servers from PyPI, captured in [findings/](findings/):
+Eight documented audit observations against seven PyPI-published servers, captured in [findings/](findings/):
 
 | Date | Target | Test | Outcome |
 |---|---|---|---|
-| 2026-05-11 | `mcp-server-fetch` | [D-003 (direct SSRF probe)](findings/2026-05-11-MCP-D-003-fetch-direct-environment-dependent-ssrf.md) | **Vulnerability** — environment-dependent SSRF (high on cloud, none on dev) |
+| 2026-05-11 | `mcp-server-fetch` | [D-003 (direct SSRF probe)](findings/2026-05-11-MCP-D-003-fetch-direct-environment-dependent-ssrf.md) | **Vulnerability** — environment-dependent SSRF (high on cloud) |
+| 2026-05-11 | `mcp-server-http-request` | [D-003 (direct SSRF probe)](findings/2026-05-11-MCP-D-003-http-request-direct-environment-dependent-ssrf.md) | **Vulnerability** — second instance of same SSRF class, different vendor |
 | 2026-05-11 | `mcp-server-fetch` | [D-001 against Claude Opus 4.7](findings/2026-05-11-MCP-D-001-fetch-opus47-defense.md) | Defense |
 | 2026-05-11 | `mcp-server-fetch` | [D-006 against Claude Opus 4.7](findings/2026-05-11-MCP-D-006-fetch-opus47-defense.md) | Defense |
 | 2026-05-11 | `mcp-server-time` | [S-003 static, 3 hits](findings/2026-05-11-MCP-S-003-time-static-param-injection-pattern.md) | Info (pattern present; benign in this deployment) |
-| 2026-05-11 | `mcp-server-git` | [D-002 (direct path-traversal probe)](findings/2026-05-11-MCP-D-002-git-direct-defense.md) | Defense (defense-in-depth example worth modeling) |
+| 2026-05-11 | `mcp-server-git` | [D-002 (direct path-traversal)](findings/2026-05-11-MCP-D-002-git-direct-defense.md) | Defense (defense-in-depth example) |
+| 2026-05-11 | `mcp-server-aidd` | [D-002 (direct path-traversal)](findings/2026-05-11-MCP-D-002-aidd-direct-defense.md) | Defense (allowed-directory containment working) |
+| 2026-05-11 | `mcp-server-aidd` | [S-001 + S-002 + S-005 (static, multi-hit)](findings/2026-05-11-aidd-three-rule-multi-hit.md) | Info (3 simultaneous rules — pattern stress test) |
 
-Each entry includes reproduction commands, the raw trace, an interpretation, caveats, and a disclosure recommendation.
+Each entry includes reproduction commands, the raw trace, an interpretation, caveats, and a disclosure recommendation. **The fetch + http-request pair is the most actionable result** — two PyPI-published Python MCP servers, different vendors, same SSRF class. Disclosure-suitable.
 
 ## Quickstart — reproduce a real finding in three commands
 

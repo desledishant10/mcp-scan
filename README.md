@@ -126,7 +126,7 @@ mcp-scan/
 
 | Phase | Planned window | Status |
 |---|---|---|
-| 1 — Static analyzer | weeks 1–6 | 6/14 rules implemented; Python AST + captured-JSON modes; CLI with severity filtering and CI-friendly exit codes |
+| 1 — Static analyzer | weeks 1–6 | 7/14 rules implemented (S-001, S-002, S-003, S-005, S-006, S-007, S-009); Python AST + captured-JSON modes; CLI with severity filtering and CI-friendly exit codes |
 | 2 — Dynamic harness | weeks 7–14 | Substantially complete: direct + proxy modes, two agent drivers, 6 scenarios runnable end-to-end against real servers |
 | 3 — Real-world audit | weeks 15–20 | **Started.** 5 documented findings against 3 real Python servers from PyPI. Cloud reproduction of the SSRF finding is the next priority. |
 | 4 — Polish + publish | weeks 21–26 | Not started. README and reference docs complete; blog/whitepaper and conference submission pending audit volume. |

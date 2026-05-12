@@ -4,12 +4,12 @@
 **Filed by:** Dishant Desle — didesle7@gmail.com
 **Filed to:**
 - `mcp-server-fetch`: **filed** — https://github.com/modelcontextprotocol/servers/issues/4143
-- `mcp-server-http-request`: pending (upstream repo TBD via PyPI page)
+- `mcp-server-http-request`: **filed** — email to esteban@statespace.com, gavin@statespace.com (no public issue tracker)
 **Affected:**
 - `mcp-server-fetch` v2025.4.7 (PyPI; Anthropic reference)
 - `mcp-server-http-request` v0.1.0 (PyPI; community)
-**Embargo:** 2026-08-10 (90 days from filing)
-**Status:** filed (mcp-server-fetch); pending (mcp-server-http-request)
+**Embargo:** 2026-08-10 (90 days from filing — both packages)
+**Status:** **filed (both)**
 
 ---
 
@@ -128,7 +128,15 @@ Next checkpoints:
 - **2026-06-11 (Day +30):** if no engagement, escalate via Anthropic security contact (if available) or via the repo's `SECURITY.md`.
 - **2026-08-10 (Day +90):** public release per embargo, regardless of fix status.
 
-### Pending: `mcp-server-http-request` filing (email-based)
+### 2026-05-12 — `mcp-server-http-request` email sent
+
+Sent via email to both listed maintainers — `esteban@statespace.com` and `gavin@statespace.com` — using the draft below verbatim (with the minor tone tweaks discussed during preparation).
+
+Same 90-day embargo (2026-08-10). Same follow-up checkpoints: day +14 (2026-05-26) ping, day +30 (2026-06-11) escalate, day +90 release.
+
+Both halves of the class-wide finding (Anthropic reference + community package) are now in flight.
+
+### Originally pending: `mcp-server-http-request` filing (email-based)
 
 The PyPI page lists no homepage, no source URL, and no issue tracker. Only contact channel is the maintainer emails listed in the PyPI metadata:
 

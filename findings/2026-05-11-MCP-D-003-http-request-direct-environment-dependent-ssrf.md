@@ -4,7 +4,7 @@
 **Target:** `mcp-server-http-request` v0.1.0 (PyPI; community-published)
 **Tested by:** [scenarios/MCP-D-003-ssrf-url-fetcher.yaml](../scenarios/MCP-D-003-ssrf-url-fetcher.yaml) + a targeted follow-up probe
 **Agent driver:** n/a (direct mode — harness as MCP client)
-**Outcome:** **VULNERABILITY** (same class as the [mcp-server-fetch finding](2026-05-11-MCP-D-003-fetch-direct-environment-dependent-ssrf.md), which was demonstrated on EC2 2026-05-12 — http-request inherits all the same exploitability conditions because the underlying issue is identical)
+**Outcome:** **VULNERABILITY (disclosure email-filed 2026-05-12)** — same class as the [mcp-server-fetch finding](2026-05-11-MCP-D-003-fetch-direct-environment-dependent-ssrf.md), which was demonstrated on EC2 the same day. Coordinated disclosure sent direct to maintainers (`esteban@statespace.com`, `gavin@statespace.com`) since no public issue tracker is listed on PyPI. Embargo: 2026-08-10.
 
 ## Result
 

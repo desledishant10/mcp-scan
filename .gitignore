@@ -39,6 +39,11 @@ ENV/
 /tools.json
 /scratch/
 
+# Test artifacts from the audit CLI tests (real captures live alongside
+# but get an explicit name; the mock-mcp-server one is regenerated each
+# test run).
+calibration/reports/captured-mock-*.json
+
 # Local secrets (must never be committed).
 .env
 .env.local

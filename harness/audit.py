@@ -70,22 +70,35 @@ async def audit_package(package: str, install: bool = True,
     else:
         targets = _candidate_targets(package)
 
-    last_error: Exception | None = None
+    # Suppress stderr from the per-candidate attempts — the MCP SDK +
+    # anyio interaction can dump alarming-looking task-group tracebacks
+    # when stdio_client can't connect to a missing-entry-point binary.
+    # Those tracebacks are not user-actionable; the actionable info is
+    # the exception value, which we collect for the final error message.
+    import contextlib
+    import os as _os
+
     captured: dict | None = None
     target_used: Target | None = None
+    attempt_log: list[str] = []
     for target in targets:
+        cmd_str = " ".join([target.command] + (target.args or []))
         try:
-            captured = await capture(target)
+            with open(_os.devnull, "w") as devnull, contextlib.redirect_stderr(devnull):
+                captured = await capture(target)
             target_used = target
             break
         except Exception as e:                              # noqa: BLE001
-            last_error = e
+            attempt_log.append(f"  - {cmd_str}\n      {type(e).__name__}: {str(e)[:140]}")
             continue
     if captured is None:
+        attempts = "\n".join(attempt_log) if attempt_log else "  (no candidates tried)"
         raise RuntimeError(
-            f"Could not launch {package!r} as an MCP server. "
-            f"Last error: {last_error}. "
-            f"Try --server-cmd to specify the entry point explicitly."
+            f"Could not launch {package!r} as an MCP server. Attempts:\n"
+            f"{attempts}\n"
+            f"Hint: many community packages don't expose a `python -m <pkg>` "
+            f"entry point. Try `--server-cmd <executable> --server-arg=<arg> ...` "
+            f"with the entry point listed in the package's PyPI page or README."
         )
 
     # Persist the capture under calibration/reports/ for traceability.

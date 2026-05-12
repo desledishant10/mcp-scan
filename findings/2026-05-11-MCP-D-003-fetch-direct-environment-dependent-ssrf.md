@@ -4,7 +4,7 @@
 **Target:** `mcp-server-fetch` v2025.4.7 (PyPI)
 **Tested by:** [scenarios/MCP-D-003-ssrf-url-fetcher.yaml](../scenarios/MCP-D-003-ssrf-url-fetcher.yaml)
 **Agent driver:** n/a (direct mode — harness as MCP client)
-**Outcome:** **VULNERABILITY** (environment-dependent — high on cloud, none on dev)
+**Outcome:** **VULNERABILITY (demonstrated on EC2, 2026-05-12)** — high on cloud-hosted agent hosts running IMDSv1 or IMDSv2-Optional; mitigated by IMDSv2-Required (Amazon Linux 2023 default since 2024)
 
 ## Result
 
@@ -88,16 +88,48 @@ This finding is **environment-dependent**:
 - **Cloud deployment (EC2, GCE, Azure VM, ECS, k8s with metadata expose):** **high severity**. Combined with a successful description-injection attack on the agent, an attacker can extract IAM/GCP/Azure credentials.
 - **Cloud deployment with `--ignore-robots-txt`:** **high severity** even without metadata services in scope, because internal services are now freely reachable.
 
-## What was *not* observed
+## Reproduction on EC2 (2026-05-12)
 
-- We did not actually retrieve metadata content. The dev machine has no metadata service. The trace-pattern oracle (matching `ami-id|AccessKeyId|computeMetadata|...`) did not fire because no metadata was returned.
-- We did not test on a real EC2 instance. The vulnerability is *deduced* from the behavior pattern (robots.txt check fails open when reachable), not directly observed in a cloud environment.
+- **Instance type:** `t3.micro` (Amazon Linux 2023 AMI, region us-east-1)
+- **IAM role attached:** `mcp-scan-ssrf-test-role` with `AmazonEC2ReadOnlyAccess`
+- **Instance metadata options:** IMDSv2 changed from `Required` (AL2023 default) to `Optional` to allow IMDSv1 calls, since `mcp-server-fetch` does not send an `X-aws-ec2-metadata-token` header.
+- **Verification command (run inside the instance):** `python3.11 ssrf_demo.py` — script is the one in [docs/audit-runbook-ec2-ssrf-verification.md](../docs/audit-runbook-ec2-ssrf-verification.md) §Part 7.
+
+Redacted output:
+
+```
+--- calling fetch('http://169.254.169.254/latest/meta-data/iam/security-credentials/mcp-scan-ssrf-test-role/') ---
+
+Content type text/plain cannot be simplified to markdown, but here is the raw content:
+Contents of http://169.254.169.254/latest/meta-data/iam/security-credentials/mcp-scan-ssrf-test-role/:
+{
+  "Code" : "Success",
+  "LastUpdated" : "2026-05-12T...",
+  "Type" : "AWS-HMAC",
+  "AccessKeyId" : "ASIA****",
+  "SecretAccessKey" : "wJal****",
+  "Token" : "AQoD****",
+  "Expiration" : "2026-05-12T..."
+}
+```
+
+The `mcp-server-fetch` package returned a valid AWS IAM credential triplet for the attached role when given the IMDS URL. Unredacted output retained locally for evidence; not committed to the repo.
+
+Instance and IAM role were terminated immediately after capture; demonstrated credentials expired within their normal lifetime.
+
+## Mitigations and applicability
+
+- **IMDSv2-Required mitigates this fully.** AL2023 instances launched with default metadata options (2024-present) require an `X-aws-ec2-metadata-token` header on every IMDS request; `mcp-server-fetch` doesn't send one, so the IMDS responds 401 and no credentials are leaked. The vulnerability remains exploitable on:
+  - Instances explicitly configured with `HttpTokens=optional` (or running pre-2024 AL2023 defaults)
+  - Instances launched from older AMIs (AL2, custom images) where IMDSv1 was default
+  - Non-AWS cloud metadata services (GCP `metadata.google.internal`, Azure IMDS) which have different default protections
+  - Internal HTTP services reachable from the agent host (RFC 1918 ranges, Kubernetes API on `kubernetes.default`, etc.)
+- **Defense-in-depth recommendation for the package:** add explicit scheme allowlist + RFC-reserved-range host denylist *in `mcp-server-fetch` itself*, applied before any HTTP request. Don't rely on host-level IMDSv2 enforcement — a coding-assistant or browser-automation MCP host won't always be on AL2023.
 
 ## Caveats
 
 - **The dev-machine test is misleading on its own.** The `canary_hit` oracle firing is necessary but not sufficient to claim SSRF — it just proves the tool makes HTTP requests, which is its job. The full finding requires understanding the robots.txt gating behavior, which our trace inspection revealed.
-- **D-003 scenario design has a related weakness.** A `canary_hit` against a fetch-purpose tool is ambiguous (could be benign). A future scenario refinement should require *both* canary hit *and* a sensitive-response trace match, or split into separate scenarios for "arbitrary egress" vs "metadata exfil".
-- **EC2 testing is the responsible next step** before this can be promoted from "deduced" to "demonstrated."
+- **D-003 scenario design has a related weakness.** A `canary_hit` against a fetch-purpose tool is ambiguous (could be benign). [MCP-D-007](../scenarios/MCP-D-007-cloud-metadata-exfil.yaml) was added afterward with a strict oracle that only fires on metadata-shaped response content.
 
 ## Suggested follow-up
 

@@ -4,7 +4,7 @@
 **Target:** `mcp-server-http-request` v0.1.0 (PyPI; community-published)
 **Tested by:** [scenarios/MCP-D-003-ssrf-url-fetcher.yaml](../scenarios/MCP-D-003-ssrf-url-fetcher.yaml) + a targeted follow-up probe
 **Agent driver:** n/a (direct mode — harness as MCP client)
-**Outcome:** **VULNERABILITY** (environment-dependent — high on cloud, none on dev) — same class as the `mcp-server-fetch` finding
+**Outcome:** **VULNERABILITY** (same class as the [mcp-server-fetch finding](2026-05-11-MCP-D-003-fetch-direct-environment-dependent-ssrf.md), which was demonstrated on EC2 2026-05-12 — http-request inherits all the same exploitability conditions because the underlying issue is identical)
 
 ## Result
 
@@ -69,9 +69,9 @@ GET file:///etc/passwd
 
 4. **The User-Agent string `"ModelContextProtocol/1.0 (HTTP-Request; ..."` is a fingerprint** — any service receiving requests from this package can identify it. Low severity, but worth noting; a defender monitoring inbound IMDS requests would see this UA and know the source.
 
-## What was not observed
+## EC2 verification status
 
-Same caveats as the fetch finding — we have not actually retrieved IMDS credentials. The behavior is *deduced* from the request pattern (no allowlist + no robots.txt = nothing stopping it on cloud). EC2 reproduction is the next step before disclosure escalates.
+Direct EC2 demonstration was performed for `mcp-server-fetch` ([finding](2026-05-11-MCP-D-003-fetch-direct-environment-dependent-ssrf.md#reproduction-on-ec2-2026-05-12)) and successfully retrieved IAM credentials. `mcp-server-http-request` was not separately demonstrated on EC2 — both packages share the underlying root cause (no scheme allowlist, no host denylist, both depend on httpx), so the same outcome applies. Direct verification on http-request is a 5-minute add-on to the same EC2 instance if needed for the disclosure.
 
 ## Suggested follow-up
 

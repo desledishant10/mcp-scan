@@ -29,33 +29,34 @@ Eight documented audit observations against seven PyPI-published servers, captur
 
 Each entry includes reproduction commands, the raw trace, an interpretation, caveats, and a disclosure recommendation. **The fetch + http-request pair is the most actionable result** — two PyPI-published Python MCP servers, different vendors, same SSRF class. Disclosure-suitable.
 
-## Quickstart — reproduce a real finding in three commands
+## Quickstart — audit any pip-installable MCP server in one command
 
 ```bash
-# Install (editable):
-git clone <repo> && cd mcp-scan
+git clone https://github.com/desledishant10/mcp-scan && cd mcp-scan
 pip install -e ".[dev]"
-
-# Capture the official Anthropic mcp-server-fetch:
-pip install mcp-server-fetch
-mcp-scan-capture --server-cmd python --server-arg=-m --server-arg=mcp_server_fetch \
-    -o captured.json
-
-# Run static analysis:
-mcp-scan-analyze captured.json
+mcp-scan-audit mcp-server-fetch
 ```
 
-Output:
+That single command pip-installs `mcp-server-fetch` (or any other PyPI MCP server), captures its `tools/list` over stdio, runs the static analyzer rules, runs the capability classifier, and prints a human-readable report. Sample output against the official Anthropic reference server:
 
 ```
-[HIGH] MCP-S-001  <captured>:0  fetch
-    Tool description contains instruction-like phrasing directed at the model.
-    | ou internet access. Now you can fetch the most up-to-date information and let the user know
+=== mcp-server-fetch ===
+Launched: /usr/bin/python3 -m mcp_server_fetch
+Tools:    1
+  fetch
+Capability tags: net_egress
 
-1 finding.
+2 analyzer findings:
+  [HIGH    ] MCP-S-001  fetch
+      Tool description contains instruction-like phrasing directed at the model.
+  [HIGH    ] MCP-S-009  fetch
+      Tool has URL parameter(s) ['url'] with no schema-level constraint
+      and no validation keywords in the description.
+
+Capture saved to: calibration/reports/captured-mcp-server-fetch.json
 ```
 
-That's the project's first real-world catch — the shipped tool description of `mcp-server-fetch` contains agent-directed phrasing that an attacker could use to override prior model alignment.
+Two real findings on the official Anthropic reference server, surfaced from one `mcp-scan-audit` command — one at the description level (S-001 catches agent-directed instructions in the tool's docstring), one at the schema level (S-009 catches the missing SSRF allowlist). Both have been disclosed; the SSRF one was [demonstrated end-to-end on EC2](findings/2026-05-11-MCP-D-003-fetch-direct-environment-dependent-ssrf.md) with real IAM credentials retrieved.
 
 ## What's inside
 
@@ -63,6 +64,7 @@ That's the project's first real-world catch — the shipped tool description of 
 
 | Command | Purpose |
 |---------|---------|
+| `mcp-scan-audit` | **One-shot:** install + capture + analyze + classify + report against any pip-installable MCP server |
 | `mcp-scan-capture` | Connect to any stdio MCP server, dump `tools/list` as JSON |
 | `mcp-scan-scaffold-gt` | Generate a calibration ground-truth skeleton from a capture |
 | `mcp-scan-analyze` | Static analysis — Python source or captured JSON |
@@ -159,13 +161,13 @@ Out of scope for v1 (intentional — these are good follow-ups, not features):
 
 | | |
 |---|---|
-| Tests passing | **103 / 103** |
+| Tests passing | **106 / 106** |
 | Analyzer rules | 9 of 14 (S-001, S-002, S-003, S-004, S-005, S-006, S-007, S-008, S-009) |
 | Dynamic scenarios | 7 (5 from v0.1 seed set + D-006 subtle-injection + D-007 cloud-metadata-exfil) |
 | Calibration corpus | **10 labeled targets, 81 tools, 100/100 precision-recall** (8 verified by direct capture) — hit the spec's "stable" threshold |
 | Real-world finding entries | 5 (1 vulnerability, 3 defense, 1 informational) |
 | Packages | 5 (`analyzer`, `classifier`, `harness`, `calibration` + `scenarios` as YAML) |
-| Console scripts | 7 |
+| Console scripts | 8 (added `mcp-scan-audit` — single-command audit) |
 
 ## Running the test suite
 

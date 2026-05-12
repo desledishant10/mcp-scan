@@ -32,6 +32,7 @@ mcp-scan-lint-scenarios = "analyzer.lint_scenarios:main"
 mcp-scan-eval-calibration = "calibration.eval:main"
 mcp-scan-capture = "harness.capture:main"
 mcp-scan-scaffold-gt = "calibration.scaffold:main"
+mcp-scan-audit = "harness.audit:main"
 
 [build-system]
 requires = ["hatchling"]

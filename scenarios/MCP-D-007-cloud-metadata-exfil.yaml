@@ -1,0 +1,72 @@
+id: MCP-D-007
+name: Cloud metadata-service exfiltration via URL-fetching tool
+description: >
+  Targets URL-fetching tools (net_egress capability) against the cloud
+  metadata service endpoints — AWS IMDS, ECS task-role, GCP, and Azure
+  IMDS. Unlike MCP-D-003 (which uses a canary endpoint and can false-
+  positive on any fetch tool simply doing its job), this scenario asserts
+  ONLY on metadata-shaped response content. A canary-style "proves
+  egress" check is deliberately absent.
+
+  Local development environments will see clean results because
+  link-local addresses (169.254.x.x) are not reachable. The scenario is
+  designed to be run against cloud-hosted agent hosts as part of
+  audit-phase verification. A failing run on cloud is strong evidence of
+  credential-exfil potential.
+
+  Complements the static MCP-S-009 rule, which flags the same SSRF
+  surface from the captured tools/list alone. Together they form the
+  belt-and-suspenders detection for the most actionable vulnerability
+  class in the project's findings corpus.
+category: tool.input.ssrf
+severity: critical
+references:
+  - https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html
+  - https://krebsonsecurity.com/2019/08/what-we-can-learn-from-the-capital-one-hack/
+  - findings/2026-05-11-MCP-D-003-fetch-direct-environment-dependent-ssrf.md
+  - findings/2026-05-11-MCP-D-003-http-request-direct-environment-dependent-ssrf.md
+spec_versions: ["2025-06-18"]
+
+requires:
+  capabilities:
+    - any: [net_egress]
+
+attack:
+  - step: tools_call
+    target_tool_capability: net_egress
+    argument_role: url
+    payloads:
+      # AWS IMDSv1 (the credentialed endpoints)
+      - "http://169.254.169.254/latest/meta-data/"
+      - "http://169.254.169.254/latest/meta-data/iam/security-credentials/"
+      - "http://169.254.169.254/latest/dynamic/instance-identity/document"
+      # ECS task role
+      - "http://169.254.170.2/v2/credentials/"
+      # GCP metadata (requires Metadata-Flavor header, but a vulnerable
+      # tool may pass headers through too — at minimum the server's
+      # error response should not contain credential-shaped strings)
+      - "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token"
+      - "http://metadata.google.internal/computeMetadata/v1/project/project-id"
+      # Azure IMDS
+      - "http://169.254.169.254/metadata/instance?api-version=2021-02-01"
+      - "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/"
+
+oracle:
+  any_of:
+    # Match JSON-shape field names (`"foo":`) from real metadata responses
+    # rather than bare substrings. This avoids false positives when the
+    # server echoes the requested URL back in an error message — early
+    # testing against mcp-server-http-request fired n=10 matches on URL
+    # echoes containing "computeMetadata" and "tenant_id". Requiring the
+    # quoted-field-colon JSON shape distinguishes actual response bodies
+    # from URL strings in error text.
+    - trace_contains:
+        pattern: '"(AccessKeyId|SecretAccessKey|RoleArn|access_token|ami-id|instance-id|expires_in|vmId|projectNumber|tenantId|subscriptionId)"\s*:'
+        where: response
+
+cleanup: []
+
+# `expected_in_baseline: false` means a clean (non-cloud) baseline run
+# should NOT produce findings. This scenario only fires when actually
+# run against a host with reachable metadata services — see notes above.
+expected_in_baseline: false

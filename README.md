@@ -85,7 +85,7 @@ That's the project's first real-world catch — the shipped tool description of 
 
 Every rule's lexicon decisions are commented with the calibration evidence that drove them. Spec for all 14 rules: [docs/static-rules.md](docs/static-rules.md).
 
-### Dynamic scenarios (6 in the seed set)
+### Dynamic scenarios (7 in the seed set)
 
 Scenario YAML format: [docs/scenario-schema.md](docs/scenario-schema.md). The seed set lives in [scenarios/](scenarios/) and is described in [scenarios/README.md](scenarios/README.md). Highlights:
 
@@ -94,6 +94,7 @@ Scenario YAML format: [docs/scenario-schema.md](docs/scenario-schema.md). The se
 - `MCP-D-001` / `MCP-D-006` — tool-description injection at two phrasing tiers (obvious vs subtle)
 - `MCP-D-004` — tool-definition rug pull (mutate after first approval)
 - `MCP-D-005` — invisible Unicode-tag-character injection via tool output
+- `MCP-D-007` — cloud metadata-service exfiltration via URL-fetcher (strict oracle — only fires on actual metadata response content, designed for EC2/GCP/Azure audit verification)
 
 ### Capability classifier
 
@@ -158,7 +159,7 @@ Out of scope for v1 (intentional — these are good follow-ups, not features):
 |---|---|
 | Tests passing | **94 / 94** |
 | Analyzer rules | 7 of 14 (S-001, S-002, S-003, S-005, S-006, S-007, S-009) |
-| Dynamic scenarios | 6 (5 from v0.1 seed set + 1 calibration-driven addition) |
+| Dynamic scenarios | 7 (5 from v0.1 seed set + D-006 subtle-injection + D-007 cloud-metadata-exfil) |
 | Calibration corpus | **10 labeled targets, 81 tools, 100/100 precision-recall** (8 verified by direct capture) — hit the spec's "stable" threshold |
 | Real-world finding entries | 5 (1 vulnerability, 3 defense, 1 informational) |
 | Packages | 5 (`analyzer`, `classifier`, `harness`, `calibration` + `scenarios` as YAML) |

@@ -2,15 +2,13 @@
 
 **Filed:** 2026-05-12
 **Filed by:** Dishant Desle — didesle7@gmail.com
-**Filed to:**
-- Preferred: GitHub Security Advisory (private) — https://github.com/atrawog/mcp-oauth-gateway/security/advisories/new
-- Fallback / heads-up: email to Andreas Trawoeger — `atrawog@gmail.com` (listed as `Author-email` in the `mcp-fetch-streamablehttp-server` PyPI metadata)
+**Filed to:** Email to Andreas Trawoeger — `atrawog@gmail.com` (the `Author-email` listed in the `mcp-fetch-streamablehttp-server` PyPI metadata). Preferred channel — GitHub Security Advisory at https://github.com/atrawog/mcp-oauth-gateway/security/advisories/new — was unavailable: the form returns 404 because "Private vulnerability reporting" is not enabled for outside reporters on this repo, even though the Security tab is present in the nav. Direct email is the published-on-PyPI contact channel and matches the precedent set earlier the same day by the `mcp-server-http-request` SSRF disclosure (also email-only because that package's PyPI page lists no issue tracker).
 **Affected:**
 - `mcp-streamablehttp-proxy` v0.2.0 (PyPI)
 - `mcp-fetch-streamablehttp-server` v0.2.0 (PyPI)
 - Likely additional components in the same `atrawog/mcp-oauth-gateway` monorepo — full repo audit recommended by maintainer.
 **Embargo:** 2026-08-10 (90 days from filing — aligns with the project's existing SSRF embargo for `mcp-server-fetch` / `mcp-server-http-request`)
-**Status:** **draft**
+**Status:** **filed (email)**
 
 ---
 
@@ -205,4 +203,14 @@ The earlier SSRF disclosures used public issues + emails because (a) `modelconte
 
 ## Updates
 
-_(none yet — draft. Append timestamped entries below as the disclosure progresses.)_
+### 2026-05-12 — Email sent to maintainer
+
+Sent direct to `atrawog@gmail.com` (the Author-email from the `mcp-fetch-streamablehttp-server` PyPI metadata). The GitHub Security Advisory form was unavailable — `/security/advisories/new` returned 404, indicating the repo has not enabled private vulnerability reporting for outside reporters even though the Security tab is present in the nav. Email is the published-on-PyPI maintainer contact channel, and matches the precedent set by the `mcp-server-http-request` SSRF disclosure earlier the same day (also email-only).
+
+Sent body matches the report above verbatim, with a 3-line preamble explaining the channel choice. Acknowledgement pending.
+
+Follow-up cadence:
+- **2026-05-26 (Day +14):** if no acknowledgement, polite follow-up email.
+- **2026-06-11 (Day +30):** if no engagement, escalate via the repo's Issues tracker as a private heads-up reference (no exploit detail in public; pointer to this disclosure record).
+- **2026-07-11 (Day +60):** if still silent, broader-ecosystem notification (MCP forums, related projects). Existence of the issue is disclosable at this point; concrete reproduction artifacts remain embargoed.
+- **2026-08-10 (Day +90):** public release per embargo, regardless of fix status. Aligns with the SSRF embargo so the blog post covers both classes.

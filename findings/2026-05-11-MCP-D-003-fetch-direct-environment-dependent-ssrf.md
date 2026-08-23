@@ -24,6 +24,21 @@ Three states verified end-to-end against the containerized [`poc/ssrf/`](../poc/
 
 This changes the disclosure outcome category: previously logged as "fix shipped + verified" (an inaccurate shorthand); the correct status is "community-authored fix PR open + branch-verified; awaiting maintainer merge." If the PR remains open through the 2026-08-10 embargo, the public writeup will describe both: the fix that exists at the source level, and the 90-day-and-counting unmerged state.
 
+## Status update (~2026-08-01): disclosure closed as "not planned" by vendor
+
+Anthropic contributor `@localden` closed [modelcontextprotocol/servers#4143](https://github.com/modelcontextprotocol/servers/issues/4143) as "not planned" and consolidated it to the older umbrella issue [#3741](https://github.com/modelcontextprotocol/servers/issues/3741) (opened 2026-03-27 by an external contributor; the only recorded prior comment is hidden as spam; no substantive activity beyond the consolidation event).
+
+At the time of closure, PR #4226 (the community-authored fix by `@kgarg2468`) was:
+
+- Open, 1 commit, +171/-5 lines
+- CI: 16 of 16 checks passing (3 skipped)
+- Reviewed by external contributor `@LuuOW` on 2026-06-13 (technical audit; not an approving review with write access)
+- Independently reproduction-verified on 2026-06-20 via the containerized `poc/ssrf/` harness (see the Fix status table above)
+
+**PR #4226 remains open + unmerged.** No reviewer with write access has approved it. The latest PyPI release `mcp-server-fetch==2026.6.4` (uploaded 2026-06-04) is still vulnerable to the original probe.
+
+This changes the disclosure outcome from "community fix PR open + branch-verified; awaiting maintainer merge" to **"vendor declined; consolidated to dormant umbrella; PR unmerged despite green CI + external review + independent verification."** Coordinated-disclosure obligations are satisfied: the report was received, considered, and closed by the maintainer, and the 90-day embargo policy (2026-08-10) has been observed. The public writeup describes both the technical vulnerability and the full disclosure-response chain end-to-end.
+
 ## Reproduction
 
 Two reproductions live in the repo, complementary rather than redundant:

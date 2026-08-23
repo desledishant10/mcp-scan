@@ -1,10 +1,12 @@
 # SSRF PoC harness — `mcp-server-fetch` cloud-metadata reach
 
-End-to-end runnable reproduction of the SSRF in `mcp-server-fetch` that was disclosed at [modelcontextprotocol/servers#4143](https://github.com/modelcontextprotocol/servers/issues/4143) on 2026-05-12. A fix PR was opened on the same day as the disclosure ([PR #4226](https://github.com/modelcontextprotocol/servers/pull/4226) by `@kgarg2468`, a community contributor) and has been **open + unmerged for 30 days as of 2026-06-20**. The latest PyPI release of `mcp-server-fetch` (v2026.6.4, uploaded 2026-06-04) does **not** include the fix and is still vulnerable.
+End-to-end runnable reproduction of the SSRF in `mcp-server-fetch` disclosed at [modelcontextprotocol/servers#4143](https://github.com/modelcontextprotocol/servers/issues/4143) on 2026-05-12. **The disclosure was closed by an Anthropic contributor as "not planned" on ~2026-08-01** and consolidated to the older umbrella issue [#3741](https://github.com/modelcontextprotocol/servers/issues/3741) (dormant since March 2026). The community-authored fix [PR #4226](https://github.com/modelcontextprotocol/servers/pull/4226) by `@kgarg2468` (opened 2026-05-22, CI green 16/16, external technical review complete) **remains open + unmerged**. The latest PyPI release of `mcp-server-fetch` (v2026.6.4, uploaded 2026-06-04) is still vulnerable.
 
-Companion to [`poc/dns-rebind/`](../dns-rebind/). Both disclosed vulnerability classes (outbound SSRF and inbound DNS rebinding) now have a `make demo` reproduction.
+Since no vendor-shipped fix exists and no merged PR is coming, **this harness is the definitive public reproduction of the SSRF**. Anyone can verify the vulnerability against the real `mcp-server-fetch` package in ~5 seconds without an AWS account, and verify the community-proposed fix via `make demo-fixed` (which installs from PR #4226's branch directly).
 
-This harness is **not embargoed**. The vulnerability is already public via the upstream GitHub issue + PR; the harness just packages reproduction so anyone can verify in seconds without needing an AWS account.
+Companion to [`poc/dns-rebind/`](../dns-rebind/). Both disclosed vulnerability classes (outbound SSRF and inbound DNS rebinding) have a `make demo` reproduction.
+
+This harness is **not embargoed**. The vulnerability is public via the upstream GitHub issue; the harness just packages reproduction.
 
 ## Fix status (2026-06-20)
 
